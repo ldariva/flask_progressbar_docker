@@ -1,0 +1,30 @@
+version: '3.1'
+
+services:
+  nginx:
+    image: nginx:1.15
+    container_name: nginx
+    volumes:
+      - ./default.conf:/etc/nginx/conf.d/default.conf
+    ports:
+      - 80:80
+    networks:
+      - my-network
+    depends_on:
+      - flask
+  flask:
+    #image: pb_dummy
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    container_name: flask
+    command: gunicorn --worker-class eventlet --bind 0.0.0.0:8000 -w 1 app:app
+    volumes:
+      - ./:/var/www
+    networks:
+      my-network:
+        aliases:
+          - flask-app
+
+networks:
+  my-network:
